@@ -1,0 +1,11 @@
+tv-wall-control/
+├── docker-compose.yml
+├── Dockerfile
+├── requirements.txt
+├── backend/
+│   ├── app.py
+│   ├── samsung_mdc.py
+│   └── config.py
+├── frontend/
+│   └── index.html
+└── README.md

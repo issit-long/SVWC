@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samsung TV Wall Control Panel</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #2ecc71;
+            --text-color: #ecf0f1;
+            --bg-dark: #34495e;
+            --bg-darker: #2c3e50;
+            --control-bg: #3a516e;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--bg-darker);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .status-bar {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--success-color);
+        }
+        
+        .status-indicator.offline {
+            background-color: var(--accent-color);
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 20px;
+        }
+        
+        .tv-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 15px;
+            aspect-ratio: 16/9;
+        }
+        
+        .tv-display {
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .tv-display::before {
+            content: '';
+            display: block;
+            padding-top: 56.25%; /* 16:9 aspect ratio */
+        }
+        
+        .tv-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .tv-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .tv-label {
+            font-weight: 600;
+        }
+        
+        .tv-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .power-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+        }
+        
+        .power-indicator.on {
+            background-color: var(--success-color);
+        }
+        
+        .control-panel {
+            background-color: var(--bg-darker);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .control-section {
+            margin-bottom: 25px;
+        }
+        
+        .control-section h3 {
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--secondary-color);
+            cursor: pointer;
+        }
+        
+        .btn {
+            background-color: var(--control-bg);
+            border: none;
+            color: var(--text-color);
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn.active {
+            background-color: var(--secondary-color);
+        }
+        
+        .select-wrapper {
+            position: relative;
+        }
+        
+        select {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 4px;
+            background-color: var(--control-bg);
+            color: var(--text-color);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            appearance: none;
+        }
+        
+        .btn-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        
+        .content-section {
+            background-color: var(--bg-darker);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .tab-container {
+            margin-top: 15px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        
+        .tab.active {
+            opacity: 1;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .content-list {
+            list-style: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .content-item {
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.05);
+            margin-bottom: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .content-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .layout-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .layout-option {
+            aspect-ratio: 16/9;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .layout-option:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .layout-option.active {
+            outline: 2px solid var(--secondary-color);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .action-btn {
+            padding: 10px 15px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: var(--control-bg);
+            color: var(--text-color);
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .tv-grid {
+                grid-template-columns: 1fr;
+                aspect-ratio: unset;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Samsung TV Wall Control Panel</h1>
+            <div class="status-bar">
+                <div class="status-item">
+                    <div class="status-indicator"></div>
+                    <span>Connected</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-indicator"></div>
+                    <span>MDC Protocol</span>
+                </div>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="tv-grid">
+                <div class="tv-display" id="tv1">
+                    <div class="tv-content">Display 1 - No Signal</div>
+                    <div class="tv-overlay">
+                        <div class="tv-label">Display 1</div>
+                        <div class="tv-status">
+                            <div class="power-indicator"></div>
+                            <span>HDMI 1</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tv-display" id="tv2">
+                    <div class="tv-content">Display 2 - No Signal</div>
+                    <div class="tv-overlay">
+                        <div class="tv-label">Display 2</div>
+                        <div class="tv-status">
+                            <div class="power-indicator"></div>
+                            <span>HDMI 1</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tv-display" id="tv3">
+                    <div class="tv-content">Display 3 - No Signal</div>
+                    <div class="tv-overlay">
+                        <div class="tv-label">Display 3</div>
+                        <div class="tv-status">
+                            <div class="power-indicator"></div>
+                            <span>HDMI 1</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tv-display" id="tv4">
+                    <div class="tv-content">Display 4 - No Signal</div>
+                    <div class="tv-overlay">
+                        <div class="tv-label">Display 4</div>
+                        <div class="tv-status">
+                            <div class="power-indicator"></div>
+                            <span>HDMI 1</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <div class="control-section">
+                    <h3>Display Selection</h3>
+                    <div class="btn-group">
+                        <button class="btn active" data-display="all">All Displays</button>
+                        <button class="btn" data-display="1">Display 1</button>
+                        <button class="btn" data-display="2">Display 2</button>
+                        <button class="btn" data-display="3">Display 3</button>
+                        <button class="btn" data-display="4">Display 4</button>
+                    </div>
+                </div>
+                
+                <div class="control-section">
+                    <h3>Power Control</h3>
+                    <div class="btn-group">
+                        <button class="btn" id="power-on">Power On</button>
+                        <button class="btn" id="power-off">Power Off</button>
+                    </div>
+                </div>
+                
+                <div class="control-section">
+                    <h3>Volume Control</h3>
+                    <div class="control-group">
+                        <label class="control-label">Volume Level</label>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="100" value="50" class="slider" id="volume-slider">
+                            <span id="volume-value">50</span>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn" id="mute">Mute</button>
+                        <button class="btn" id="unmute">Unmute</button>
+                    </div>
+                </div>
+                
+                <div class="control-section">
+                    <h3>Input Source</h3>
+                    <div class="control-group">
+                        <div class="select-wrapper">
+                            <select id="input-source">
+                                <option value="hdmi1">HDMI 1</option>
+                                <option value="hdmi2">HDMI 2</option>
+                                <option value="dp">DisplayPort</option>
+                                <option value="vga">VGA</option>
+                                <option value="magicinfo">MagicInfo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn" id="apply-input" style="width: 100%">Apply Input</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-section">
+            <h2>Content & Layout Management</h2>
+            <div class="tabs">
+                <div class="tab active" data-tab="content">Content</div>
+                <div class="tab" data-tab="layout">Layout</div>
+                <div class="tab" data-tab="schedule">Schedule</div>
+            </div>
+            
+            <div class="tab-container">
+                <div class="tab-content active" id="content-tab">
+                    <div class="control-group">
+                        <label class="control-label">Select Content</label>
+                        <ul class="content-list">
+                            <li class="content-item">
+                                <span>Marketing Presentation</span>
+                                <span>MagicInfo</span>
+                            </li>
+                            <li class="content-item">
+                                <span>Data Dashboard</span>
+                                <span>Local</span>
+                            </li>
+                            <li class="content-item">
+                                <span>Welcome Message</span>
+                                <span>OptiSigns</span>
+                            </li>
+                            <li class="content-item">
+                                <span>Video Wallpaper</span>
+                                <span>Local</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn btn-primary">Apply to Selected</button>
+                        <button class="action-btn btn-secondary">Upload New</button>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="layout-tab">
+                    <div class="control-group">
+                        <label class="control-label">Select Layout</label>
+                        <div class="layout-grid">
+                            <div class="layout-option active">1x1</div>
+                            <div class="layout-option">2x2</div>
+                            <div class="layout-option">3x1</div>
+                            <div class="layout-option">1x3</div>
+                            <div class="layout-option">1+3</div>
+                            <div class="layout-option">Custom</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn btn-primary">Apply Layout</button>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="schedule-tab">
+                    <div class="control-group">
+                        <p>Schedule content to play at specific times</p>
+                        <!-- Schedule interface would go here -->
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn btn-primary">New Schedule</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Display selection
+            const displayButtons = document.querySelectorAll('[data-display]');
+            let selectedDisplay = 'all';
+            
+            displayButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    displayButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedDisplay = this.getAttribute('data-display');
+                    updateSelectedDisplay();
+                });
+            });
+            
+            function updateSelectedDisplay() {
+                // Visual feedback for selected displays
+                const displays = document.querySelectorAll('.tv-display');
+                displays.forEach(display => {
+                    display.style.opacity = '0.7';
+                    display.style.outline = 'none';
+                });
+                
+                if (selectedDisplay === 'all') {
+                    displays.forEach(display => {
+                        display.style.opacity = '1';
+                        display.style.outline = '2px solid var(--secondary-color)';
+                    });
+                } else {
+                    const selected = document.getElementById(`tv${selectedDisplay}`);
+                    if (selected) {
+                        selected.style.opacity = '1';
+                        selected.style.outline = '2px solid var(--secondary-color)';
+                    }
+                }
+            }
+            
+            // Power control
+            const powerOnBtn = document.getElementById('power-on');
+            const powerOffBtn = document.getElementById('power-off');
+            const powerIndicators = document.querySelectorAll('.power-indicator');
+            
+            powerOnBtn.addEventListener('click', function() {
+                simulatePowerOn();
+            });
+            
+            powerOffBtn.addEventListener('click', function() {
+                simulatePowerOff();
+            });
+            
+            function simulatePowerOn() {
+                if (selectedDisplay === 'all') {
+                    powerIndicators.forEach(indicator => {
+                        indicator.classList.add('on');
+                    });
+                    document.querySelectorAll('.tv-content').forEach(content => {
+                        content.textContent = 'Display Active';
+                    });
+                } else {
+                    const indicator = document.querySelector(`#tv${selectedDisplay} .power-indicator`);
+                    const content = document.querySelector(`#tv${selectedDisplay} .tv-content`);
+                    if (indicator) indicator.classList.add('on');
+                    if (content) content.textContent = 'Display Active';
+                }
+                // In a real implementation, this would send MDC commands to the displays
+                console.log(`Power ON command sent to display(s): ${selectedDisplay}`);
+            }
+            
+            function simulatePowerOff() {
+                if (selectedDisplay === 'all') {
+                    powerIndicators.forEach(indicator => {
+                        indicator.classList.remove('on');
+                    });
+                    document.querySelectorAll('.tv-content').forEach(content => {
+                        content.textContent = 'No Signal';
+                    });
+                } else {
+                    const indicator = document.querySelector(`#tv${selectedDisplay} .power-indicator`);
+                    const content = document.querySelector(`#tv${selectedDisplay} .tv-content`);
+                    if (indicator) indicator.classList.remove('on');
+                    if (content) content.textContent = 'No Signal';
+                }
+                // In a real implementation, this would send MDC commands to the displays
+                console.log(`Power OFF command sent to display(s): ${selectedDisplay}`);
+            }
+            
+            // Volume control
+            const volumeSlider = document.getElementById('volume-slider');
+            const volumeValue = document.getElementById('volume-value');
+            const muteBtn = document.getElementById('mute');
+            const unmuteBtn = document.getElementById('unmute');
+            
+            volumeSlider.addEventListener('input', function() {
+                volumeValue.textContent = this.value;
+                // In a real implementation, this would send MDC commands to the displays
+                console.log(`Volume set to ${this.value} on display(s): ${selectedDisplay}`);
+            });
+            
+            muteBtn.addEventListener('click', function() {
+                console.log(`Mute command sent to display(s): ${selectedDisplay}`);
+            });
+            
+            unmuteBtn.addEventListener('click', function() {
+                console.log(`Unmute command sent to display(s): ${selectedDisplay}`);
+            });
+            
+            // Input source
+            const inputSource = document.getElementById('input-source');
+            const applyInputBtn = document.getElementById('apply-input');
+            
+            applyInputBtn.addEventListener('click', function() {
+                const source = inputSource.value;
+                const sourceText = inputSource.options[inputSource.selectedIndex].text;
+                
+                if (selectedDisplay === 'all') {
+                    document.querySelectorAll('.tv-status span').forEach(span => {
+                        span.textContent = sourceText.toUpperCase();
+                    });
+                } else {
+                    const span = document.querySelector(`#tv${selectedDisplay} .tv-status span`);
+                    if (span) span.textContent = sourceText.toUpperCase();
+                }
+                
+                // In a real implementation, this would send MDC commands to the displays
+                console.log(`Input changed to ${source} on display(s): ${selectedDisplay}`);
+            });
+            
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // Layout selection
+            const layoutOptions = document.querySelectorAll('.layout-option');
+            
+            layoutOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    layoutOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Initialize selected display
+            updateSelectedDisplay();
+        });
+    </script>
+</body>
+</html>

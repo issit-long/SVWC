@@ -1,0 +1,16 @@
+
+## Building and Running
+
+To build and run the container:
+
+```bash
+# Create the project directory
+mkdir tv-wall-control
+cd tv-wall-control
+
+# Create all the files as described above
+
+# Build and run
+docker-compose up -d
+
+# Access the application at http://localhost:8080

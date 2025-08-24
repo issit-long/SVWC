@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  tv-control:
+    build: .
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    environment:
+      - TV_NETWORK=192.168.1.0/24
+      - TV_IPS=192.168.1.101,192.168.1.102,192.168.1.103,192.168.1.104
+    networks:
+      - tv-network
+
+networks:
+  tv-network:
+    driver: bridge
